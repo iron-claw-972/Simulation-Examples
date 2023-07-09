@@ -1,0 +1,15 @@
+{
+  "NTProvider": {
+    "types": {
+      "/FMSInfo": "FMSInfo",
+      "/SmartDashboard/Wrist": "Mechanism2d"
+    },
+    "windows": {
+      "/SmartDashboard/Wrist": {
+        "window": {
+          "visible": true
+        }
+      }
+    }
+  }
+}
