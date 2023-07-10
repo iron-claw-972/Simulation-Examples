@@ -111,8 +111,7 @@ public class WristSubsystem extends SubsystemBase {
   }
 
   public void moveMotorsWithPID(double setpoint){
-    System.out.println(setpoint); 
-    m_pidValue = m_controller.calculate(m_encoder.getDistance(), setpoint);
+    m_pidValue = m_controller.calculate(m_encoder.getDistance(), Units.degreesToRadians(setpoint));
     m_wristMotor.setVoltage(m_pidValue); 
   }
 
