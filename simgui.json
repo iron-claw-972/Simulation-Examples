@@ -2,6 +2,7 @@
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
+      "/SmartDashboard/PID Controller": "PIDController",
       "/SmartDashboard/Wrist": "Mechanism2d"
     },
     "windows": {
