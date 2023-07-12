@@ -44,6 +44,8 @@ public class WristSubsystem extends SubsystemBase {
 
   private final PIDController m_controller;
   private double m_pidValue; 
+  private double m_setpoint; 
+
 
   private final Encoder m_encoder;
   private final EncoderSim m_encoderSim; 
@@ -53,12 +55,14 @@ public class WristSubsystem extends SubsystemBase {
     //m_wristMotorSim = m_wristMotor.getSimCollection();
     //m_wristMotor.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, 0, 0);
 
-    m_encoder = new Encoder(0,1); 
+    m_encoder = new Encoder(0,1);
+        
     m_encoderSim = new EncoderSim(m_encoder); 
     
     m_encoder.setDistancePerPulse(2*Math.PI/4096);
 
     m_controller = new PIDController(WristConstants.kP, WristConstants.kI, WristConstants.kD);
+
     m_armSim = new SingleJointedArmSim(
       WristConstants.m_armGearbox, 
       WristConstants.kGearing, 
@@ -70,9 +74,19 @@ public class WristSubsystem extends SubsystemBase {
     );
 
     m_wristDisplay = new Mechanism2d(90, 90);
-    m_pivot = m_wristDisplay.getRoot("pivot", 45, 45); 
-    m_movingAppendage = m_pivot.append(new MechanismLigament2d("Moving appendage", 70, m_armSim.getAngleRads(), 10, new Color8Bit(Color.kPurple))); 
-    m_stationaryAppendage = m_pivot.append(new MechanismLigament2d("stationary appendage", 90, 180));
+
+    m_pivot = m_wristDisplay.getRoot("ArmPivot", 45, 45);
+
+    m_stationaryAppendage = m_pivot.append(new MechanismLigament2d("ArmTower", 60, -90));
+
+    m_movingAppendage = m_pivot.append(
+        new MechanismLigament2d(
+            "Arm",
+            30,
+            Units.radiansToDegrees(m_armSim.getAngleRads()),
+            6,
+            new Color8Bit(Color.kYellow)));
+
     SmartDashboard.putData("Wrist", m_wristDisplay); 
   }
 
@@ -86,8 +100,6 @@ public class WristSubsystem extends SubsystemBase {
 
   @Override
   public void simulationPeriodic() {
-    System.out.println(m_pidValue); 
-
     m_armSim.setInput(m_wristMotor.get() * RobotController.getBatteryVoltage());
 
     // Next, we update it. The standard loop time is 20ms.
@@ -103,13 +115,15 @@ public class WristSubsystem extends SubsystemBase {
 
     // Update the Mechanism Arm angle based on the simulated arm angle
     m_movingAppendage.setAngle(Units.radiansToDegrees(m_armSim.getAngleRads()));
-    
+
+    System.out.println(m_pidValue);
   }
 
   public void moveMotorsWithPID(double setpoint){
-    m_pidValue = m_controller.calculate(m_encoder.getDistance(), Units.degreesToRadians(setpoint));
-    m_wristMotor.setVoltage(m_pidValue); 
-  }
 
+    m_pidValue = m_controller.calculate(m_encoder.getDistance(), Units.degreesToRadians(setpoint));
+    m_wristMotor.setVoltage(m_pidValue);
+    
+  }
 
 }

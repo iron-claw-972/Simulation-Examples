@@ -20,7 +20,7 @@ public class WristConstants {
   public static final double kMinAngleRads = Units.degreesToRadians(-75);
   public static final double kMaxAngleRads = Units.degreesToRadians(255);
 
-  public static final double kP = 50; 
+  public static final double kP = 5; 
   public static final double kI = 0; 
   public static final double kD = 0; 
 
