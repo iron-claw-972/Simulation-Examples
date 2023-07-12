@@ -4,14 +4,10 @@
 
 package frc.robot.subsystems;
 
-import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
-import com.ctre.phoenix.motorcontrol.TalonFXSimCollection;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
-
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
 import edu.wpi.first.wpilibj.simulation.BatterySim;
@@ -24,7 +20,6 @@ import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
-import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.WristConstants;
 
@@ -36,22 +31,21 @@ public class WristSubsystem extends SubsystemBase {
   //private final TalonFXSimCollection m_wristMotorSim;  
 
   //create the wrist display canvas
-  private final Mechanism2d m_wristDisplay; 
-  private final MechanismRoot2d m_pivot; 
-  private final MechanismLigament2d m_stationaryAppendage; 
-  private final MechanismLigament2d m_movingAppendage; 
-  private final SingleJointedArmSim m_armSim; 
+  private Mechanism2d m_wristDisplay; 
+  private MechanismRoot2d m_pivot; 
+  private MechanismLigament2d m_stationaryAppendage; 
+  private MechanismLigament2d m_movingAppendage; 
+  private SingleJointedArmSim m_armSim; 
 
   private final PIDController m_controller;
   private double m_pidValue; 
   private double m_setpoint; 
 
-
   private final Encoder m_encoder;
   private final EncoderSim m_encoderSim; 
 
   public WristSubsystem() {
-    m_wristMotor = new PWMSparkMax(0);//WPI_TalonFX(WristConstants.motorPortSim);
+    m_wristMotor = new PWMSparkMax(0);
     //m_wristMotorSim = m_wristMotor.getSimCollection();
     //m_wristMotor.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, 0, 0);
 
@@ -63,31 +57,35 @@ public class WristSubsystem extends SubsystemBase {
 
     m_controller = new PIDController(WristConstants.kP, WristConstants.kI, WristConstants.kD);
 
-    m_armSim = new SingleJointedArmSim(
-      WristConstants.m_armGearbox, 
-      WristConstants.kGearing, 
-      WristConstants.kMomentOfInertia, 
-      WristConstants.kArmLength, 
-      WristConstants.kMinAngleRads, 
-      WristConstants.kMaxAngleRads,
-      true
-    );
+    if(RobotBase.isSimulation()){
+      
+      m_armSim = new SingleJointedArmSim(
+        WristConstants.m_armGearbox, 
+        WristConstants.kGearing, 
+        WristConstants.kMomentOfInertia, 
+        WristConstants.kArmLength, 
+        WristConstants.kMinAngleRads, 
+        WristConstants.kMaxAngleRads,
+        true
+      );
 
-    m_wristDisplay = new Mechanism2d(90, 90);
+      m_wristDisplay = new Mechanism2d(90, 90);
 
-    m_pivot = m_wristDisplay.getRoot("ArmPivot", 45, 45);
+      m_pivot = m_wristDisplay.getRoot("ArmPivot", 45, 45);
+  
+      m_stationaryAppendage = m_pivot.append(new MechanismLigament2d("ArmTower", 60, -90));
+  
+      m_movingAppendage = m_pivot.append(
+          new MechanismLigament2d(
+              "Arm",
+              30,
+              Units.radiansToDegrees(m_armSim.getAngleRads()),
+              6,
+              new Color8Bit(Color.kYellow)));
+  
+      SmartDashboard.putData("Wrist", m_wristDisplay); 
+    }
 
-    m_stationaryAppendage = m_pivot.append(new MechanismLigament2d("ArmTower", 60, -90));
-
-    m_movingAppendage = m_pivot.append(
-        new MechanismLigament2d(
-            "Arm",
-            30,
-            Units.radiansToDegrees(m_armSim.getAngleRads()),
-            6,
-            new Color8Bit(Color.kYellow)));
-
-    SmartDashboard.putData("Wrist", m_wristDisplay); 
   }
 
 
@@ -106,7 +104,7 @@ public class WristSubsystem extends SubsystemBase {
     m_armSim.update(0.020);
 
     // Finally, we set our simulated encoder's readings and simulated battery voltage
-    //This also updates the real encoder as used in the PID loop
+    //This also updates the real encoder as used in the PID loop. 
     m_encoderSim.setDistance(m_armSim.getAngleRads());
     
     // SimBattery estimates loaded battery voltages
@@ -116,7 +114,8 @@ public class WristSubsystem extends SubsystemBase {
     // Update the Mechanism Arm angle based on the simulated arm angle
     m_movingAppendage.setAngle(Units.radiansToDegrees(m_armSim.getAngleRads()));
 
-    System.out.println(m_pidValue);
+    //uncomment below line if using the instant command bindings(second set in WristControls.java)
+    //moveMotorsWithPID(getSetpoint()); 
   }
 
   public void moveMotorsWithPID(double setpoint){
@@ -124,6 +123,14 @@ public class WristSubsystem extends SubsystemBase {
     m_pidValue = m_controller.calculate(m_encoder.getDistance(), Units.degreesToRadians(setpoint));
     m_wristMotor.setVoltage(m_pidValue);
     
+  }
+
+  public void setSetpoint(double setpoint){
+    m_setpoint = setpoint;
+  }
+
+  public double getSetpoint(){
+    return m_setpoint;
   }
 
 }
