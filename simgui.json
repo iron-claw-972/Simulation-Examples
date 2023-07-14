@@ -5,11 +5,18 @@
       "/LiveWindow/Ungrouped/PIDController[1]": "PIDController",
       "/LiveWindow/Ungrouped/PWMSparkMax[0]": "Motor Controller",
       "/LiveWindow/Ungrouped/Scheduler": "Scheduler",
+      "/LiveWindow/Ungrouped/Talon FX [0]": "Motor Controller",
       "/LiveWindow/WristSubsystem": "Subsystem",
       "/SmartDashboard/PID Controller": "PIDController",
+      "/SmartDashboard/PIDController[1]": "PIDController",
       "/SmartDashboard/Wrist": "Mechanism2d"
     },
     "windows": {
+      "/SmartDashboard/PIDController[1]": {
+        "window": {
+          "visible": true
+        }
+      },
       "/SmartDashboard/Wrist": {
         "window": {
           "visible": true
