@@ -61,8 +61,8 @@ public class WristControls {
      * Pass the command the WristSubsystem(stored in m_wrist instance variable) and a desired setpoint to move the wrist too
      */
     m_button1.onTrue(new MoveWrist(m_wrist, -50)); 
-    m_button2.onTrue(new MoveWrist(m_wrist, 75)); 
-    m_button3.onTrue(new MoveWrist(m_wrist, 200));
+    m_button2.onTrue(new MoveWrist(m_wrist, 0)); 
+    m_button3.onTrue(new MoveWrist(m_wrist, 50));
     
     /**
      * When a button is pressed, create an InstantCommand() that, on button press, set's the desired setpoint in the WristSubsystem     * 
