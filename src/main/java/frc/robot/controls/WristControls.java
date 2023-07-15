@@ -11,8 +11,7 @@ import frc.robot.subsystems.WristSubsystem;
 public class WristControls {
 
   /**
-   * These are instance variables.
-   * Think of them as the specific variables that we are going to need for THIS class
+   * Below are instance variables. Think of them as the specific variables that we are going to need for THIS class
    * 
    * m_wrist is a variable of the type WristSubsystem 
    * m_button1, m_button1, and m_button3 are variables of the type Trigger
@@ -30,14 +29,19 @@ public class WristControls {
    * 
    * <p>
    * 
-   * When an object of the WristControls() class is created(see RobotContainer.java) we will also pass in a WristSubsystem object to it(see RobotContainer.java)
-   * and assign it to the m_wrist instance variable. m_wrist now holds a WristSubsystem object. Now we can access the
-   * various methods we made in the WristSubsystem.java file.
+   * We will pass a WristSubsystem object to it in RobotContainer when we create an object of this class.  
+   * 
+   * <p> 
+   * 
+   * By assiging m_wrist to wristSubsystem, it now holds a WristSubsystem object. Now we can access the
+   * various methods we made in the WristSubsystem.java file from the m_wrist instance variable. 
    * 
    * <p>
    * 
    * For the other instance variables, we can just turn them directly into objects by assigning them to an instance of the class
    * by doing m_instanceVariable = new Class();
+   * 
+   * <p>
    * 
    * @param wristSubsystem
    */
@@ -58,14 +62,15 @@ public class WristControls {
 
     /**
      * When a button is pressed run the MoveWrist command. 
-     * Pass the command the WristSubsystem(stored in m_wrist instance variable) and a desired setpoint to move the wrist too
+     * Give the command the WristSubsystem(stored in m_wrist instance variable) and a desired setpoint to move the wrist too
      */
     m_button1.onTrue(new MoveWrist(m_wrist, -50)); 
     m_button2.onTrue(new MoveWrist(m_wrist, 0)); 
     m_button3.onTrue(new MoveWrist(m_wrist, 50));
     
     /**
-     * When a button is pressed, create an InstantCommand() that, on button press, set's the desired setpoint in the WristSubsystem     * 
+     * When a button is pressed an InstantCommand() is created that, on button press,
+     * sets the desired setpoint in the WristSubsystem using the setSetpoint() method declared there 
      */
 
     // m_button1.onTrue(new InstantCommand(()-> m_wrist.setSetpoint(-50)));

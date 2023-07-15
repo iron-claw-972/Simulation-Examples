@@ -3,6 +3,9 @@ package frc.robot.constants;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 
+/**
+ * These are various constants for the wrist. 
+ */
 public class WristConstants {
   public static final int motorPortSim = 0;
   public static final  DCMotor m_armGearbox = DCMotor.getVex775Pro(2);
