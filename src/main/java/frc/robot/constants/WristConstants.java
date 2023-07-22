@@ -20,15 +20,9 @@ public class WristConstants {
   /** Wrist moment of inertia represents how hard it is to angularly accelerate (ie spin) something. */
   public static final double kMomentOfInertia = kCOGWeight * kCOGDistance * kCOGDistance; // 0.1405
 
-  /**
-   * The positive/negative sign indicates which way the arm is allowed to rotate. Negative means the arm can rotate
-   * clockwise and positive means the arm can rotate counter-clockwise. Take a look at this unit circle:
-   * https://www.remind.com/tutoring-answers/what-is-a-unit-circle
-   * We are saying the max angle of rotation is Math.PI/2 radians(up at the top of the circle), rotating counterclockwise. 
-   * We are saying the min angle of rotation is -3*Math.PI/2 radians(down at the bottom of the circle), rotating clockwise. 
-   */
+
   public static final double kMaxAngleRads = 1*Math.PI/2;
-  public static final double kMinAngleRads = -1*(3*Math.PI/2);
+  public static final double kMinAngleRads = -1*(Math.PI/2);
 
   public static final double kP = 1; 
   public static final double kI = 0; 

@@ -56,7 +56,7 @@ public class WristSubsystem extends SubsystemBase {
   public WristSubsystem() {
 
     //create the motor for the wrist 
-    m_wristMotor = new WPI_TalonFX(0);
+    m_wristMotor = new WPI_TalonFX(1);
 
     //create the encoder
     m_encoder = new Encoder(0,1);
