@@ -10,16 +10,17 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix.motorcontrol.TalonFXSimCollection;
+import com.ctre.phoenix.motorcontrol.TalonSRXSimCollection;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.BatterySim;
-import edu.wpi.first.wpilibj.simulation.EncoderSim;
 import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
@@ -35,6 +36,10 @@ public class WristSubsystem extends SubsystemBase {
 
   //These are instance variables. See WristControls.java for an explanation on this type of variable. 
   private final WPI_TalonFX m_wristMotor;
+
+  private TalonFXSimCollection m_motorSim; 
+
+
   private Mechanism2d m_wristDisplay; 
   private MechanismRoot2d m_pivot; 
   private MechanismLigament2d m_stationary; 
@@ -43,10 +48,7 @@ public class WristSubsystem extends SubsystemBase {
 
   private final PIDController m_controller;
   private double m_pidValue; 
-  private double m_setpoint; 
-
-  private final Encoder m_encoder;
-  private EncoderSim m_encoderSim; 
+  private double m_setpoint;  
 
   /**
    * This is the constructor for the WristSubsystem class. 
@@ -57,12 +59,6 @@ public class WristSubsystem extends SubsystemBase {
 
     //create the motor for the wrist 
     m_wristMotor = new WPI_TalonFX(1);
-
-    //create the encoder
-    m_encoder = new Encoder(0,1);
-
-    //set the distance per pulse -- how much of an angle(in radians) each tick of the encoder is 
-    m_encoder.setDistancePerPulse(2*Math.PI/4096);
 
     //create the PID controller 
     m_controller = new PIDController(WristConstants.kP, WristConstants.kI, WristConstants.kD);
@@ -75,9 +71,8 @@ public class WristSubsystem extends SubsystemBase {
      * You don't want your encoder values changing in teleop because your simulation is running. That would break everything 
      */
     if(RobotBase.isSimulation()){
-      //create simulated encoder 
-      m_encoderSim = new EncoderSim(m_encoder); 
-      
+      m_motorSim = m_wristMotor.getSimCollection();
+
       //create arm physics simulation 
       m_armSim = new SingleJointedArmSim(
         WristConstants.m_armGearbox, 
@@ -140,9 +135,13 @@ public class WristSubsystem extends SubsystemBase {
      * 
      * The armSim then does some math to calculate it's position in radians, which we can get using
      * the getAngleRads() method. 
-     */
+     */    
+    
+    m_motorSim.setBusVoltage(RobotController.getBatteryVoltage()); 
+
 
     m_armSim.setInput(m_wristMotor.get() * RobotController.getBatteryVoltage());
+    
 
     // Next, we update the armSim. The standard loop time is 20ms.
     m_armSim.update(0.020);
@@ -155,9 +154,8 @@ public class WristSubsystem extends SubsystemBase {
      * This affects the motor's power value(-1 to 1) and we again set the armSim's input voltage as we did at the top of 
      * the simulationPeriodic() method, which affects the armSim's angle. 
      */
-
-    m_encoderSim.setDistance(m_armSim.getAngleRads());
-    
+    m_motorSim.setIntegratedSensorRawPosition(armSimRadsToTicks(m_armSim.getAngleRads())); 
+      
     /**
      * The BatterySim estimates loaded battery voltages(voltage of battery under motor load) based on the armSim.
      * We set this voltage as the VIn Voltage of the RobRio(voltage into the roboRio, this input voltage changes in real life as well)
@@ -183,7 +181,7 @@ public class WristSubsystem extends SubsystemBase {
    */
   public void moveMotorsWithPID(double setpoint){
 
-    m_pidValue = m_controller.calculate(m_encoder.getDistance(), Units.degreesToRadians(setpoint));
+    m_pidValue = m_controller.calculate(m_wristMotor.getSelectedSensorPosition()*2*Math.PI/2048, Units.degreesToRadians(setpoint));
     m_pidValue = MathUtil.clamp(m_pidValue,-1,1); 
     m_wristMotor.set(m_pidValue);
     
@@ -206,4 +204,8 @@ public class WristSubsystem extends SubsystemBase {
     return m_setpoint;
   }
 
+  public int armSimRadsToTicks(double rads){
+    int rawPos = (int)(rads/(2*Math.PI)*2048);
+    return rawPos;  
+  }
 }
