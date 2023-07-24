@@ -175,7 +175,7 @@ public class WristSubsystem extends SubsystemBase {
    */
   public void moveMotorsWithPID(double setpoint){
 
-    m_pidValue = m_controller.calculate(m_wristMotor.getSelectedSensorPosition()*2*Math.PI/2048, Units.degreesToRadians(setpoint));
+    m_pidValue = m_controller.calculate(m_wristMotor.getSelectedSensorPosition()*WristConstants.kEncoderTicksToRadsConversion, Units.degreesToRadians(setpoint));
     m_pidValue = MathUtil.clamp(m_pidValue,-1,1); 
     
     /**
