@@ -26,6 +26,9 @@ public class WristConstants {
   public static final double kMaxAngleRads = 1*Math.PI/2;
   public static final double kMinAngleRads = -1*(3*Math.PI/2);
 
+  //sometimes for gravity compensation you have to adjust the deadband of the falcon500 motor. Or else the motor won't move. 
+  public static final double kGravityCompensation = 0.035; 
+
   public static final double kP = 0.4; 
   public static final double kI = 0; 
   public static final double kD = 0.01; 

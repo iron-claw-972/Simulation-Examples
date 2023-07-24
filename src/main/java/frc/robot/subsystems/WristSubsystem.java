@@ -11,9 +11,7 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.TalonFXSimCollection;
-import com.ctre.phoenix.motorcontrol.TalonSRXSimCollection;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -65,12 +63,13 @@ public class WristSubsystem extends SubsystemBase {
 
     /**
      * Allocate resources for simulation only if the robot is in a simulation. 
-     * This is VERY IMPORTANT TO DO because when we update our simulated encoder in simulationPeriodic() it updates the actual encoder.
-     * But since this only creates simulation stuff if we are running the simulation, simulationPeriodic() has nothing to update when we are running it on a real robot. 
+     * This is VERY IMPORTANT TO DO because when we update our simulated inbuilt motor encoder(falcon motors have an inbuilt encoder) in simulationPeriodic() it updates the actual encoder.
      * 
-     * You don't want your encoder values changing in teleop because your simulation is running. That would break everything 
+     * By doing this, simulation stuff is only created if we are running the simulation. If sim stuff is only created when sim mode is running, then there is little chance of it affecting the actual stuff. 
+     * 
      */
     if(RobotBase.isSimulation()){
+      //create a simulated falcon(and inbuilt encoder, the encoder is inbuilt in the motor)
       m_motorSim = m_wristMotor.getSimCollection();
 
       //create arm physics simulation 
@@ -120,7 +119,7 @@ public class WristSubsystem extends SubsystemBase {
   //This the periodic method. It constantly runs in both teleop and autonomous. 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
+    // This method will be called once every time the scheduler runs
     
   }
 
@@ -130,16 +129,11 @@ public class WristSubsystem extends SubsystemBase {
     /**
      * First, we set our voltage to the armSim
      *  
-     * We do this by multipling the motor's power value(-1 to 1) by the battery voltage. This voltage
-     * is estimated later. 
+     * We do this by multipling the motor's power value(-1 to 1) by the battery voltage, which is estimated later.
      * 
      * The armSim then does some math to calculate it's position in radians, which we can get using
      * the getAngleRads() method. 
      */    
-    
-    m_motorSim.setBusVoltage(RobotController.getBatteryVoltage()); 
-
-
     m_armSim.setInput(m_wristMotor.get() * RobotController.getBatteryVoltage());
     
 
@@ -183,7 +177,12 @@ public class WristSubsystem extends SubsystemBase {
 
     m_pidValue = m_controller.calculate(m_wristMotor.getSelectedSensorPosition()*2*Math.PI/2048, Units.degreesToRadians(setpoint));
     m_pidValue = MathUtil.clamp(m_pidValue,-1,1); 
-    m_wristMotor.set(m_pidValue);
+    
+    /**
+     * add a gravity compensation value to help the wrist fight back against gravity. The PID value gets so small near the actual setpoint 
+     * that the motor is unable to overcome gravity
+     */
+    m_wristMotor.set(m_pidValue + WristConstants.kGravityCompensation);
     
   }
 
