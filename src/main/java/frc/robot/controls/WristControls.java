@@ -24,23 +24,22 @@ public class WristControls {
   Joystick m_joy; 
 
   /**
-   * This is the constructor for the WristControls class. As a parameter, it requires a WristSubsystem. 
+   * This is the constructor for the WristControls class. It requires a WristSubsystem class as a parameter. 
    * 
    * <p>
    * 
-   * We will pass a WristSubsystem object to it in RobotContainer when we create an object of this class.  
+   * When we create an object of this class in RobotContainer.java we will pass it a WristSubsystem object to it as well. 
    * 
    * <p> 
    * 
-   * By assiging m_wrist to wristSubsystem, it now holds a WristSubsystem object. Now we can access the
-   * various methods we made in the WristSubsystem.java file from the m_wrist instance variable. 
+   * By doing m_wrist = wristSubsystem, m_wrist holds a WristSubsystem class now. We can now access all the methods inside WristSubsystem.java
    * 
    * <p>
    * 
    * For the other instance variables, we can just turn them directly into objects by assigning them to an instance of the class
-   * by doing m_instanceVariable = new Class();
+   * by doing m_instanceVariable = new Class(); in the constructor, ex: m_joy = new Joystick(0); 
    * 
-   * <p>
+   * <p> 
    * 
    * @param wristSubsystem
    */
@@ -55,7 +54,7 @@ public class WristControls {
 
 
   /**
-   * The configureControls() method binds the MoveWrist() command to the pressing of different buttons
+   * The configureControls() method is used for control binding.
    */
   public void configureControls(){
 

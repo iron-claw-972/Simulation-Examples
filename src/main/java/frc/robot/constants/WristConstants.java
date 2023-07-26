@@ -21,20 +21,21 @@ public class WristConstants {
   /** Wrist moment of inertia represents how hard it is to angularly accelerate (ie spin) something. */
   public static final double kMomentOfInertia = kCOGWeight * kCOGDistance * kCOGDistance; // 0.1405
 
-
   public static final double kMinAngleRadsHardStop = -1*(Math.PI/2);
   public static final double kMaxAngleRadsHardStop = 1*Math.PI/2;
-
-
+  
+  //any setpoint that we set to it
   public static final double kMinAngleRadsSoftStop = -1;
   public static final double kMaxAngleRadsSoftStop = 1;
 
-  public static final double kMinPower = -1;
-  public static final double kMaxPower = 1;
+  //minimum and maximum power that we can send to the motor. Can change to make faster/slower. -1 is minimum and 1 is maximum
+  public static final double kMinPower = -0.5;
+  public static final double kMaxPower = 0.5;
 
   //sometimes for gravity compensation you have to adjust the deadband of the falcon500 motor. Or else the motor won't move. 
   public static final double kGravityCompensation = 0.035; 
 
+  //PID constants
   public static final double kP = 0.4; 
   public static final double kI = 0; 
   public static final double kD = 0.01; 
