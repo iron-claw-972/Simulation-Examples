@@ -45,8 +45,7 @@ public class WristSubsystem extends SubsystemBase {
   private SingleJointedArmSim m_armSim; 
 
   private final PIDController m_controller;
-  private double m_pidValue; 
-  private double m_setpoint;  
+  private double m_motorPower; 
 
   /**
    * This is the constructor for the WristSubsystem class. 
@@ -60,7 +59,7 @@ public class WristSubsystem extends SubsystemBase {
 
     //create the PID controller 
     m_controller = new PIDController(WristConstants.kP, WristConstants.kI, WristConstants.kD);
-
+    
     /**
      * Allocate resources for simulation only if the robot is in a simulation. 
      * This is VERY IMPORTANT TO DO because when we update our simulated inbuilt motor encoder(falcon motors have an inbuilt encoder) in simulationPeriodic() it updates the actual encoder.
@@ -78,8 +77,8 @@ public class WristSubsystem extends SubsystemBase {
         WristConstants.kGearing, 
         WristConstants.kMomentOfInertia, 
         WristConstants.kArmLength, 
-        WristConstants.kMinAngleRads, 
-        WristConstants.kMaxAngleRads,
+        WristConstants.kMinAngleRadsHardStop, 
+        WristConstants.kMaxAngleRadsHardStop,
         true
       );
 
@@ -165,7 +164,7 @@ public class WristSubsystem extends SubsystemBase {
     //uncomment below line if using the instant command bindings(second set in WristControls.java)
     //reason for this given in slideshow, slide 8: https://docs.google.com/presentation/d/175tFEuVqD1jP3H9Jsz3JcBUEr5Q0GBBXTg9RuWCQ6A4/edit#slide=id.g10b0dfc564d_0_5
     
-    //moveMotorsWithPID(getSetpoint()); 
+    moveMotorsWithPID(); 
   }
 
   /**
@@ -173,34 +172,28 @@ public class WristSubsystem extends SubsystemBase {
    * to get the arm to reach a setpoint(an angle)
    * @param setpoint
    */
-  public void moveMotorsWithPID(double setpoint){
+  public void moveMotorsWithPID(){
 
-    m_pidValue = m_controller.calculate(m_wristMotor.getSelectedSensorPosition()*WristConstants.kEncoderTicksToRadsConversion, Units.degreesToRadians(setpoint));
-    m_pidValue = MathUtil.clamp(m_pidValue,-1,1); 
-    
+    m_motorPower = m_controller.calculate(m_wristMotor.getSelectedSensorPosition()*WristConstants.kEncoderTicksToRadsConversion);
+    m_motorPower = m_motorPower + WristConstants.kGravityCompensation; 
+    MathUtil.clamp(m_motorPower, WristConstants.kMinPower, WristConstants.kMaxPower); 
+
     /**
      * add a gravity compensation value to help the wrist fight back against gravity. The PID value gets so small near the actual setpoint 
      * that the motor is unable to overcome gravity
      */
-    m_wristMotor.set(m_pidValue + WristConstants.kGravityCompensation);
+    m_wristMotor.set(m_motorPower);
     
   }
 
   /**
-   * This method sets the m_setpoint variable declared in this subsystem to a setpoint set by 
-   * an instant command in WristControls.java
-   * @param setpoint
+   * This method sets the desired setpoint to the PID controller 
+   * @param setpoint in degrees
    */
-  public void setSetpoint(double setpoint){
-    m_setpoint = setpoint;
-  }
 
-  /**
-   * This method simply returns m_setpoint
-   * @return m_setpoint
-   */
-  public double getSetpoint(){
-    return m_setpoint;
+  public void setSetpoint(double setpoint){
+    MathUtil.clamp(Units.degreesToRadians(setpoint), WristConstants.kMinAngleRadsSoftStop,WristConstants.kMaxAngleRadsSoftStop);
+    m_controller.setSetpoint(Units.degreesToRadians(setpoint)); 
   }
 
   public int armSimRadsToTicks(double rads){

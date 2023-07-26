@@ -5,7 +5,6 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.commands.MoveWrist;
 import frc.robot.subsystems.WristSubsystem;
 
 public class WristControls {
@@ -61,21 +60,13 @@ public class WristControls {
   public void configureControls(){
 
     /**
-     * When a button is pressed run the MoveWrist command. 
-     * Give the command the WristSubsystem(stored in m_wrist instance variable) and a desired setpoint to move the wrist too
-     */
-    m_button1.onTrue(new MoveWrist(m_wrist, -50)); 
-    m_button2.onTrue(new MoveWrist(m_wrist, 0)); 
-    m_button3.onTrue(new MoveWrist(m_wrist, 50));
-    
-    /**
      * When a button is pressed an InstantCommand() is created that, on button press,
      * sets the desired setpoint in the WristSubsystem using the setSetpoint() method declared there 
      */
 
-    // m_button1.onTrue(new InstantCommand(()-> m_wrist.setSetpoint(-50)));
-    // m_button2.onTrue(new InstantCommand(()-> m_wrist.setSetpoint(75)));
-    // m_button3.onTrue(new InstantCommand(()-> m_wrist.setSetpoint(200)));
+    m_button1.onTrue(new InstantCommand(()-> m_wrist.setSetpoint(-45)));
+    m_button2.onTrue(new InstantCommand(()-> m_wrist.setSetpoint(0)));
+    m_button3.onTrue(new InstantCommand(()-> m_wrist.setSetpoint(45)));
 
     
 
