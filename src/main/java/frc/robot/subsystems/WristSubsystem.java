@@ -59,7 +59,7 @@ public class WristSubsystem extends SubsystemBase {
     //create the PID controller 
     m_controller = new PIDController(WristConstants.kP, WristConstants.kI, WristConstants.kD);
 
-    //inititally have the PID setpoint be set to the wrist's resting position so that the wrist doesn't fly up when powered on. 
+    //inititally have the PID setpoint be set to the wrist's resting position so that the wrist doesn't fly up when powered on on a real robot. 
     setSetpoint(Units.radiansToDegrees(WristConstants.kMinAngleRadsHardStop));
 
     
