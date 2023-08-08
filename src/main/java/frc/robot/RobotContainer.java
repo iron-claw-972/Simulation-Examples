@@ -6,7 +6,7 @@ package frc.robot;
 
 import frc.robot.controls.WristControls;
 import frc.robot.subsystems.WristSubsystemPID;
-import frc.robot.subsystems.WristSubsystemSimple;
+import frc.robot.subsystems.WristSubsystemMotorPower;
 
 
 public class RobotContainer {
@@ -18,7 +18,7 @@ public class RobotContainer {
   //Create instance variables of the WristSubsystem and WristControls classes
   //see WristControls.java for an explanation of instance variables. 
   private final WristSubsystemPID m_wristPID; 
-  private final WristSubsystemSimple m_wristSimple; 
+  private final WristSubsystemMotorPower m_wristSimple; 
 
   private final WristControls m_wristControls; 
 
@@ -26,7 +26,7 @@ public class RobotContainer {
   public RobotContainer() {
     //turn the m_wrist subsystem into an object by assigning it an instance of the WristSubsystem class 
     m_wristPID = new WristSubsystemPID(); 
-    m_wristSimple = new WristSubsystemSimple(); 
+    m_wristSimple = new WristSubsystemMotorPower(); 
 
     /**
      * Turn the m_wristControls instance variable into an object by passing it an instance of the WristControls class 

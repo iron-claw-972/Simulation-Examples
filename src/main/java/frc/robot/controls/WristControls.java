@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.WristSubsystemPID;
-import frc.robot.subsystems.WristSubsystemSimple;
+import frc.robot.subsystems.WristSubsystemMotorPower;
 
 public class WristControls {
 
@@ -19,7 +19,7 @@ public class WristControls {
   */
 
   WristSubsystemPID m_wristPID; 
-  WristSubsystemSimple m_wristSimple; 
+  WristSubsystemMotorPower m_wristSimple; 
 
   Trigger m_button1;
   Trigger m_button2;
@@ -46,7 +46,7 @@ public class WristControls {
    * 
    * @param wristSubsystem
    */
-  public WristControls(WristSubsystemPID wristSubsystemPID, WristSubsystemSimple wristSubsystemSimple){
+  public WristControls(WristSubsystemPID wristSubsystemPID, WristSubsystemMotorPower wristSubsystemSimple){
     
     m_wristPID = wristSubsystemPID; 
     m_wristSimple = wristSubsystemSimple; 

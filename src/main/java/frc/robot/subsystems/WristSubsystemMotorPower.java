@@ -27,7 +27,7 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.WristConstants;
 
-public class WristSubsystemSimple extends SubsystemBase {
+public class WristSubsystemMotorPower extends SubsystemBase {
 
   //These are instance variables. See WristControls.java for an explanation on this type of variable. 
   private final WPI_TalonFX m_wristMotor;
@@ -47,7 +47,7 @@ public class WristSubsystemSimple extends SubsystemBase {
    * See WristControls.java for a detailed explanation of a constructor. 
    */
 
-  public WristSubsystemSimple() {
+  public WristSubsystemMotorPower() {
 
     //create the motor for the wrist 
     m_wristMotor = new WPI_TalonFX(1);
