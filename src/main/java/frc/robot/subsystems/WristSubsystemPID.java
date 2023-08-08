@@ -60,7 +60,6 @@ public class WristSubsystemPID extends SubsystemBase {
     m_controller = new PIDController(WristConstants.kP, WristConstants.kI, WristConstants.kD);
 
     //inititally have the PID setpoint be set to the wrist's resting position so that the wrist doesn't fly up when powered on on a real robot. 
-    setSetpoint(Units.radiansToDegrees(WristConstants.kMinAngleRadsHardStop));
 
     
     /**
@@ -116,6 +115,8 @@ public class WristSubsystemPID extends SubsystemBase {
 
       //put the PID on SmartDashboard for easy PID tuning. 
       SmartDashboard.putData(m_controller); 
+      setSetpoint(Units.radiansToDegrees(WristConstants.kMinAngleRadsHardStop));
+
     }
 
   }
@@ -181,6 +182,7 @@ public class WristSubsystemPID extends SubsystemBase {
     m_moving.setAngle(Units.radiansToDegrees(m_armSim.getAngleRads()));
     
     moveMotorsWithPID(); 
+    System.out.println(m_motorPower);
   }
 
   /**
@@ -217,6 +219,7 @@ public class WristSubsystemPID extends SubsystemBase {
     
     //finally set the setpoint to the controller
     m_controller.setSetpoint(Units.degreesToRadians(setpoint)); 
+
   }
 
   /**

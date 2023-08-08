@@ -6,7 +6,6 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.WristSubsystemPID;
-import frc.robot.subsystems.WristSubsystemMotorPower;
 
 public class WristControls {
 
@@ -19,7 +18,6 @@ public class WristControls {
   */
 
   WristSubsystemPID m_wristPID; 
-  WristSubsystemMotorPower m_wristSimple; 
 
   Trigger m_button1;
   Trigger m_button2;
@@ -46,10 +44,9 @@ public class WristControls {
    * 
    * @param wristSubsystem
    */
-  public WristControls(WristSubsystemPID wristSubsystemPID, WristSubsystemMotorPower wristSubsystemSimple){
+  public WristControls(WristSubsystemPID wristSubsystemPID){
     
     m_wristPID = wristSubsystemPID; 
-    m_wristSimple = wristSubsystemSimple; 
     m_joy = new Joystick(0); 
     m_button1 = new JoystickButton(m_joy, 1);
     m_button2 = new JoystickButton(m_joy, 2);
@@ -67,12 +64,10 @@ public class WristControls {
      * sets the desired setpoint in the WristSubsystem using the setSetpoint() method declared there 
      */
 
-    // m_button1.onTrue(new InstantCommand(()-> m_wrist.setSetpoint(-45)));
-    // m_button2.onTrue(new InstantCommand(()-> m_wrist.setSetpoint(0)));
-    // m_button3.onTrue(new InstantCommand(()-> m_wrist.setSetpoint(45)));  
-    m_button1.onTrue(new InstantCommand(()-> m_wristSimple.setMotorPower(0.25)));
-    m_button2.onTrue(new InstantCommand(()-> m_wristSimple.setMotorPower(-0.25)));
-    
+    m_button1.onTrue(new InstantCommand(()-> m_wristPID.setSetpoint(-45)));
+    m_button2.onTrue(new InstantCommand(()-> m_wristPID.setSetpoint(0)));
+    m_button3.onTrue(new InstantCommand(()-> m_wristPID.setSetpoint(45)));  
+
 
   }
 }
