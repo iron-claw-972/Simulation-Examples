@@ -4,9 +4,6 @@
 
 
 //This Simulation example is built off of WPILib's Arm Simulation Example and Iron Claw's 2023 FRC code available on Github. 
-//https://github.com/wpilibsuite/allwpilib/tree/main/wpilibjExamples/src/main/java/edu/wpi/first/wpilibj/examples/armsimulation
-//https://github.com/iron-claw-972/FRC2023
-
 
 package frc.robot.subsystems;
 
@@ -30,7 +27,7 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.WristConstants;
 
-public class WristSubsystem extends SubsystemBase {
+public class WristSubsystemSimple extends SubsystemBase {
 
   //These are instance variables. See WristControls.java for an explanation on this type of variable. 
   private final WPI_TalonFX m_wristMotor;
@@ -43,7 +40,6 @@ public class WristSubsystem extends SubsystemBase {
   private MechanismLigament2d m_moving; 
   private SingleJointedArmSim m_armSim; 
 
-  private final PIDController m_controller;
   private double m_motorPower; 
 
   /**
@@ -51,16 +47,10 @@ public class WristSubsystem extends SubsystemBase {
    * See WristControls.java for a detailed explanation of a constructor. 
    */
 
-  public WristSubsystem() {
+  public WristSubsystemSimple() {
 
     //create the motor for the wrist 
     m_wristMotor = new WPI_TalonFX(1);
-
-    //create the PID controller 
-    m_controller = new PIDController(WristConstants.kP, WristConstants.kI, WristConstants.kD);
-
-    //inititally have the PID setpoint be set to the wrist's resting position so that the wrist doesn't fly up when powered on on a real robot. 
-    setSetpoint(Units.radiansToDegrees(WristConstants.kMinAngleRadsHardStop));
 
     
     /**
@@ -114,10 +104,8 @@ public class WristSubsystem extends SubsystemBase {
       //put the wrist on SmartDashboard by putting the wrist_display on smartDashboard 
       SmartDashboard.putData("Wrist", m_wristDisplay); 
 
-      //put the PID on SmartDashboard for easy PID tuning. 
-      SmartDashboard.putData(m_controller); 
     }
-
+    setMotorPower(0);
   }
 
 
@@ -125,7 +113,7 @@ public class WristSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once every time the scheduler runs
-    moveMotorsWithPID();
+    moveMotor();
     
   }
 
@@ -180,7 +168,7 @@ public class WristSubsystem extends SubsystemBase {
     // Finally update the moving arm's angle based on the armSim angle. This updates the display. 
     m_moving.setAngle(Units.radiansToDegrees(m_armSim.getAngleRads()));
     
-    moveMotorsWithPID(); 
+    moveMotor(); 
   }
 
   /**
@@ -188,44 +176,15 @@ public class WristSubsystem extends SubsystemBase {
    * to get the arm to reach a setpoint(an angle)
    * @param setpoint
    */
-  public void moveMotorsWithPID(){
 
-    m_motorPower = m_controller.calculate(m_wristMotor.getSelectedSensorPosition()*WristConstants.kEncoderTicksToRadsConversion);
-    m_motorPower = m_motorPower + WristConstants.kGravityCompensation; 
-
-    //clamp the final motor power to prevent it from going to fast. This is useful in real life to stop your subsystem from breaking. 
-    MathUtil.clamp(m_motorPower, WristConstants.kMinPower, WristConstants.kMaxPower); 
-
-    /**
-     * Add a gravity compensation value to help the wrist fight back against gravity. The PID value gets so small near the actual setpoint 
-     * that the motor is unable to overcome gravity
-     */
-    m_wristMotor.set(m_motorPower);
-    
+  public void setMotorPower(double power){
+    m_motorPower = MathUtil.clamp(power,-1,1); 
   }
 
-  /**
-   * This method sets the desired setpoint to the PID controller 
-   * @param setpoint in degrees
-   */
-  public void setSetpoint(double setpoint){
-    //reset i-term of PID controller. You should almost NEVER need to use I. 
-    m_controller.reset();
-    
-    //clamp the setpoint to prevent giving the wrist a setpoint value that exceeds it's max or min rotation range to prevent it from breaking itself
-    MathUtil.clamp(Units.degreesToRadians(setpoint), WristConstants.kMinAngleRadsSoftStop,WristConstants.kMaxAngleRadsSoftStop);
-    
-    //finally set the setpoint to the controller
-    m_controller.setSetpoint(Units.degreesToRadians(setpoint)); 
+  public void moveMotor(){
+    m_wristMotor.set(m_motorPower); 
   }
 
-  /**
-   * This function converts the armSim physics simulation radian measurement to ticks(in integer form) for the simulated falcon encoder
-   * The falcon encoder accepts only integers. 
-   * 
-   * @param rads the armSim's radian measurement
-   * @return raw encoder position in integer form 
-   */
   public int armSimRadsToTicks(double rads){
     int rawPos = (int)(rads/(2*Math.PI)*2048);
     return rawPos;  
