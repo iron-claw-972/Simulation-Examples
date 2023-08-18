@@ -43,9 +43,6 @@ public class WristConstants {
   public static final double kMinPower = -0.5;
   public static final double kMaxPower = 0.5;
 
-  //sometimes for gravity compensation you have to adjust the deadband(range where certain power values are ignored) of the falcon500 motor. Or else the motor won't move. 
-  public static final double kGravityCompensation = 0.035; 
-
   //PID constants
   public static final double kP = 0.4; 
   public static final double kI = 0; 
