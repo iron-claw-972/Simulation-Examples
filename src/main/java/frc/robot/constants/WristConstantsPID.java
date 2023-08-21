@@ -6,7 +6,7 @@ import edu.wpi.first.math.util.Units;
 /**
  * These are various constants for the wrist. 
  */
-public class WristConstants {
+public class WristConstantsPID {
   public static final int kMotorID = 0;
 
   //In reality, when we turn on our robot, the wrist will likely be at our bottom hard stop.
@@ -50,6 +50,8 @@ public class WristConstants {
 
   //conversion constant to convert from encoder ticks to radians. There are 2048 ticks per rotation for this encoder(the number varies by encoder)
   public static final double kEncoderTicksToRadsConversion = 2*Math.PI/2048;
+
+
 
 
 }

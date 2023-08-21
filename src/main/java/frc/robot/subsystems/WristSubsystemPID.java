@@ -32,7 +32,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.constants.WristConstants;
+import frc.robot.constants.WristConstantsPID;
 
 public class WristSubsystemPID extends SubsystemBase {
 
@@ -61,7 +61,7 @@ public class WristSubsystemPID extends SubsystemBase {
     m_wristMotor = new WPI_TalonFX(1);
 
     //create the PID controller 
-    m_controller = new PIDController(WristConstants.kP, WristConstants.kI, WristConstants.kD);
+    m_controller = new PIDController(WristConstantsPID.kP, WristConstantsPID.kI, WristConstantsPID.kD);
 
     
     /**
@@ -78,16 +78,16 @@ public class WristSubsystemPID extends SubsystemBase {
 
       //create arm physics simulation 
       m_armSim = new SingleJointedArmSim(
-        WristConstants.m_armGearbox, 
-        WristConstants.kGearing, 
-        WristConstants.kMomentOfInertia, 
-        WristConstants.kArmLength, 
-        WristConstants.kMinAngleRadsHardStop, 
-        WristConstants.kMaxAngleRadsHardStop,
+        WristConstantsPID.m_armGearbox, 
+        WristConstantsPID.kGearing, 
+        WristConstantsPID.kMomentOfInertia, 
+        WristConstantsPID.kArmLength, 
+        WristConstantsPID.kMinAngleRadsHardStop, 
+        WristConstantsPID.kMaxAngleRadsHardStop,
         false
       );
       
-      m_armSim.setState(VecBuilder.fill(WristConstants.kMinAngleRadsHardStop,0)); 
+      m_armSim.setState(VecBuilder.fill(WristConstantsPID.kMinAngleRadsHardStop,0)); 
       //initialize encoder value to 0. This models us turning on our robot
       m_wristMotor.setSelectedSensorPosition(0);
 
@@ -117,7 +117,7 @@ public class WristSubsystemPID extends SubsystemBase {
               new Color8Bit(Color.kYellow)));
 
       //put the wrist display on the Sim GUI by putting m_wrist_display on smartDashboard. See slideshow on how to acess and use the simulator
-      SmartDashboard.putData("Wrist", m_wristDisplay); 
+      SmartDashboard.putData("Wrist with PID", m_wristDisplay); 
     }
 
 
@@ -172,7 +172,7 @@ public class WristSubsystemPID extends SubsystemBase {
     //                                                                                 |
     //The value that the encoder gets set is: -512 ticks. But at that angle, we want the encoder to be 0. This allows us to apply a setpoint offset that makes the wrist go where we want to go.
     //Read the comments above kSetpointOffsetRads in WristConstants.java for an explanation why. 
-    m_motorSim.setIntegratedSensorRawPosition(armSimRadsToTicks(m_armSim.getAngleRads()+WristConstants.kSetpointOffsetRads)); 
+    m_motorSim.setIntegratedSensorRawPosition(armSimRadsToTicks(m_armSim.getAngleRads()+WristConstantsPID.kSetpointOffsetRads)); 
 
     //Finally update the moving arm's angle based on the armSim angle. This updates the display. 
     m_moving.setAngle(Units.radiansToDegrees(m_armSim.getAngleRads()));
@@ -189,11 +189,11 @@ public class WristSubsystemPID extends SubsystemBase {
     m_controller.reset();
 
     //add the radian setpoint offset to the setpoint after converting it to radians.
-    setpoint = Units.degreesToRadians(setpoint)+WristConstants.kSetpointOffsetRads;
+    setpoint = Units.degreesToRadians(setpoint)+WristConstantsPID.kSetpointOffsetRads;
     
     //clamp the setpoint to prevent giving the wrist a setpoint value that exceeds it's max or min rotation range to prevent it from breaking itself
     //we add the offset here as well. Read the comments above kSetpointOffsetRads in WristConstants.java for an explanation why. 
-    setpoint = MathUtil.clamp(setpoint, WristConstants.kMinAngleRadsSoftStop+WristConstants.kSetpointOffsetRads,WristConstants.kMaxAngleRadsHardStop+WristConstants.kSetpointOffsetRads);
+    setpoint = MathUtil.clamp(setpoint, WristConstantsPID.kMinAngleRadsSoftStop+WristConstantsPID.kSetpointOffsetRads,WristConstantsPID.kMaxAngleRadsHardStop+WristConstantsPID.kSetpointOffsetRads);
 
     //finally set the setpoint to the controller
     m_controller.setSetpoint(setpoint); 
@@ -204,10 +204,10 @@ public class WristSubsystemPID extends SubsystemBase {
    */
   public void moveMotorsWithPID(){
 
-    m_motorPower = m_controller.calculate(m_wristMotor.getSelectedSensorPosition()*WristConstants.kEncoderTicksToRadsConversion);
+    m_motorPower = m_controller.calculate(m_wristMotor.getSelectedSensorPosition()*WristConstantsPID.kEncoderTicksToRadsConversion);
 
     //clamp the final motor power to prevent it from going to fast. This is useful in real life to stop your subsystem from breaking. 
-    MathUtil.clamp(m_motorPower, WristConstants.kMinPower, WristConstants.kMaxPower); 
+    MathUtil.clamp(m_motorPower, WristConstantsPID.kMinPower, WristConstantsPID.kMaxPower); 
 
     /**
      * Add a gravity compensation value to help the wrist fight back against gravity. The PID value gets so small near the actual setpoint 

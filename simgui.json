@@ -18,7 +18,9 @@
       "/LiveWindow/WristSubsystem": "Subsystem",
       "/SmartDashboard/PID Controller": "PIDController",
       "/SmartDashboard/PIDController[1]": "PIDController",
-      "/SmartDashboard/Wrist": "Mechanism2d"
+      "/SmartDashboard/Wrist": "Mechanism2d",
+      "/SmartDashboard/Wrist with PID": "Mechanism2d",
+      "/SmartDashboard/Wrist with motor power": "Mechanism2d"
     },
     "windows": {
       "/SmartDashboard/PIDController[1]": {
@@ -26,7 +28,12 @@
           "visible": true
         }
       },
-      "/SmartDashboard/Wrist": {
+      "/SmartDashboard/Wrist with PID": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Wrist with motor power": {
         "window": {
           "visible": true
         }

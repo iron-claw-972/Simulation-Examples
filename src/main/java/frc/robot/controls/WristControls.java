@@ -5,7 +5,8 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.constants.WristConstants;
+import frc.robot.constants.WristConstantsPID;
+import frc.robot.subsystems.WristSubsystemMotorPower;
 import frc.robot.subsystems.WristSubsystemPID;
 
 public class WristControls {
@@ -18,12 +19,18 @@ public class WristControls {
    * m_joy is a variable of the type Joystick
   */
 
-  WristSubsystemPID m_wrist; 
+  WristSubsystemPID m_wristPID; 
+  WristSubsystemMotorPower m_wristMotorPower; 
 
-  Trigger m_button1;
-  Trigger m_button2;
-  Trigger m_button3;
-  Joystick m_joy; 
+  Trigger m_button1PID;
+  Trigger m_button2PID;
+  Trigger m_button3PID;
+
+  Trigger m_button1MotorPower;
+  Trigger m_button2MotorPower;
+  
+  Joystick m_joyPID; 
+  Joystick m_joyMotorPower; 
 
   /**
    * This is the constructor for the WristControls class. We give the constructor a parameter -- an object(wristSubsystemPID) of the type WristSubsystemPID(a class). 
@@ -44,16 +51,26 @@ public class WristControls {
    * 
    * @param wristSubsystem
    */
-  public WristControls(WristSubsystemPID wristSubsystemPID){
+  public WristControls(WristSubsystemPID wristSubsystemPID, WristSubsystemMotorPower wristSubsystemMotorPower){
     
-    m_wrist = wristSubsystemPID; 
-    
-    //create a joystick object and assign it to m_joy. this joystick and its buttons can be accessed in simulation and real life. 
-    m_joy = new Joystick(0); 
+    m_wristPID = wristSubsystemPID; 
+    m_wristMotorPower = wristSubsystemMotorPower; 
 
-    m_button1 = new JoystickButton(m_joy, 1);
-    m_button2 = new JoystickButton(m_joy, 2);
-    m_button3 = new JoystickButton(m_joy,3);
+    //create a joystick object and assign it to m_joy. this joystick and its buttons can be accessed in simulation and real life. 
+    m_joyPID = new Joystick(0); 
+    m_joyMotorPower = new Joystick(1); 
+
+    //PID buttons
+    m_button1PID = new JoystickButton(m_joyPID, 1);
+    m_button2PID = new JoystickButton(m_joyPID, 2);
+    m_button3PID = new JoystickButton(m_joyPID,3);
+
+    //motor power buttons
+    m_button1MotorPower = new JoystickButton(m_joyMotorPower, 1);
+    m_button2MotorPower = new JoystickButton(m_joyMotorPower, 2);
+
+
+
   }
 
 
@@ -67,9 +84,14 @@ public class WristControls {
      * sets the desired setpoint to the wrist by using the setSetpoint() method declared in WristSubsystemPID.java
      */
 
-    m_button1.onTrue(new InstantCommand(()-> m_wrist.setSetpoint(-45)));
-    m_button2.onTrue(new InstantCommand(()-> m_wrist.setSetpoint(0)));
-    m_button3.onTrue(new InstantCommand(()-> m_wrist.setSetpoint(45)));  
+    m_button1PID.onTrue(new InstantCommand(()-> m_wristPID.setSetpoint(-45)));
+    m_button2PID.onTrue(new InstantCommand(()-> m_wristPID.setSetpoint(0)));
+    m_button3PID.onTrue(new InstantCommand(()-> m_wristPID.setSetpoint(45)));  
+
+    //Motor Power buttons
+    m_button1MotorPower.onTrue(new InstantCommand(()-> m_wristMotorPower.setMotorPower(0.25)));
+    m_button2MotorPower.onTrue(new InstantCommand(()-> m_wristMotorPower.setMotorPower(-0.25)));
+
 
 
   }
