@@ -16,7 +16,7 @@ public class WristConstantsPID {
   //When we command the robot to go to a 0 radian angle(completely flat), in reality, completely flat is PI/2 radians for this example, NOT 0. 
   //So if we give our wrist a setpoint of 0 radians, we need the wrist to actually go PI/2 radians. Therefore, we add an OFFSET of PI/2 radians.  
   //So when we turn our robot on, we need to add positive PI/2 to whatever setpoints we command the wrist to go to. 
-  //We additionally add this offset to soft stops to get the wrist to move to the actual angle it needs to go to. 
+  //We additionally add this offset to soft stops in our setSetpoint() method to get the wrist to move to the actual angle it needs to go to. 
   
   public static final double kSetpointOffsetRads = Math.PI/2; 
 

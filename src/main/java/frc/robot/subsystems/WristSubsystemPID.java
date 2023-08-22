@@ -46,7 +46,7 @@ public class WristSubsystemPID extends SubsystemBase {
   private MechanismRoot2d m_pivot; 
   private MechanismLigament2d m_stationary; 
   private MechanismLigament2d m_moving; 
-  private SingleJointedArmSim m_armSim; 
+  private SingleJointedArmSim m_wristPhysicsSim; 
 
 
 
@@ -76,8 +76,9 @@ public class WristSubsystemPID extends SubsystemBase {
       //create a simulated falcon(and inbuilt encoder, the encoder is inbuilt in the motor)
       m_motorSim = m_wristMotor.getSimCollection();
 
-      //create arm physics simulation 
-      m_armSim = new SingleJointedArmSim(
+      //create wrist physics simulation. This will simulate the physics of our wrist. 
+      //we are calculating the physiscs of our wrist based on a single jointed arm. 
+      m_wristPhysicsSim = new SingleJointedArmSim(
         WristConstantsPID.m_armGearbox, 
         WristConstantsPID.kGearing, 
         WristConstantsPID.kMomentOfInertia, 
@@ -87,7 +88,7 @@ public class WristSubsystemPID extends SubsystemBase {
         false
       );
       
-      m_armSim.setState(VecBuilder.fill(WristConstantsPID.kMinAngleRadsHardStop,0)); 
+      m_wristPhysicsSim.setState(VecBuilder.fill(WristConstantsPID.kMinAngleRadsHardStop,0)); 
       //initialize encoder value to 0. This models us turning on our robot
       m_wristMotor.setSelectedSensorPosition(0);
 
@@ -112,7 +113,7 @@ public class WristSubsystemPID extends SubsystemBase {
           new MechanismLigament2d(
               "Moving",
               30,
-              Units.radiansToDegrees(m_armSim.getAngleRads()),
+              Units.radiansToDegrees(m_wristPhysicsSim.getAngleRads()),
               6,
               new Color8Bit(Color.kYellow)));
 
@@ -156,7 +157,7 @@ public class WristSubsystemPID extends SubsystemBase {
      * 
      * Adding up all the currents of all of our subsystems would give us a more accurate loaded battery voltage number and a more accurate sim. But it's fine for this. It may or may not be neccesary to add based on the current draw of the other subsystems.  
      *    
-     * If we were to call m_armSim.getAngleRads() the physiscs sim would do some math using this voltage and gravity and other stuff(probably) and calculate its angle in radians. 
+     * If we were to call m_wristSim.getAngleRads() the physiscs sim would do some math using this voltage and gravity and other stuff(probably) and calculate its angle in radians. 
      *
      * Initally, in the constructor we give the wrist a setpoint to go to by calling setSetpoint(). Then, by calling moveMotorsWithPID(), m_wristMotor.get() returns a number that isn't 0. Thus, if we multiply it by the calculated battery voltage, we set a voltage to the physics sim. This changes the angle of the physics simulation. 
      *      
@@ -164,21 +165,21 @@ public class WristSubsystemPID extends SubsystemBase {
      * 
      * Finally, by setting the angle of the sim to the moving part of the wrist, we see it changes angle in the display. 
      */    
-    m_armSim.setInput(m_wristMotor.get() * BatterySim.calculateDefaultBatteryLoadedVoltage(m_armSim.getCurrentDrawAmps()));
+    m_wristPhysicsSim.setInput(m_wristMotor.get() * BatterySim.calculateDefaultBatteryLoadedVoltage(m_wristPhysicsSim.getCurrentDrawAmps()));
     
-    //Next, we update the armSim. The standard loop time is 20ms.
-    m_armSim.update(0.020);
+    //Next, we update the physics sim. The standard loop time is 20ms.
+    m_wristPhysicsSim.update(0.020);
 
-    //here we set the position of the encoder. We add the radian offset to the radian angle value that the armSim returns in order to
-    //convert from whatever the armSim angle returns to what the actual angle the wrist should be in real life. 
-    //For example, when the armSim is at -PI/2 radians, the wrist looks like this:  ---|
+    //here we set the position of the encoder for PID calculations. We add the radian offset to the radian angle value that the physics sim returns in order to
+    //convert from whatever angle the physics sim returns to what the actual angle the wrist should be in real life. 
+    //For example, when the sim is at -PI/2 radians, the wrist looks like this:  ---|
     //                                                                                 |
-    //The value that the encoder gets set is: -512 ticks. But at that angle, we want the encoder to be 0. This allows us to apply a setpoint offset that makes the wrist go where we want to go.
-    //Read the comments above kSetpointOffsetRads in WristConstants.java for an explanation why. 
-    m_motorSim.setIntegratedSensorRawPosition(armSimRadsToTicks(m_armSim.getAngleRads()+WristConstantsPID.kSetpointOffsetRads)); 
+    //The value that the encoder gets set is: -512 ticks. But at that angle, we want the encoder to be 0. Thus by adding the setpoint offset we get 0.
+    //Read more in the comments above kSetpointOffsetRads in WristConstants.java.
+    m_motorSim.setIntegratedSensorRawPosition(physicsSimRadsToTicks(m_wristPhysicsSim.getAngleRads()+WristConstantsPID.kSetpointOffsetRads)); 
 
-    //Finally update the moving arm's angle based on the armSim angle. This updates the display. 
-    m_moving.setAngle(Units.radiansToDegrees(m_armSim.getAngleRads()));
+    //Finally update the moving arm's angle based on the sim's angle. This updates the display. 
+    m_moving.setAngle(Units.radiansToDegrees(m_wristPhysicsSim.getAngleRads()));
     
   }
 
@@ -191,6 +192,8 @@ public class WristSubsystemPID extends SubsystemBase {
     m_controller.reset();
 
     //add the radian setpoint offset to the setpoint after converting it to radians.
+    //we add the offset here as well. Read the comments above kSetpointOffsetRads in WristConstants.java for an explanation why. 
+
     setpoint = Units.degreesToRadians(setpoint)+WristConstantsPID.kSetpointOffsetRads;
     
     //clamp the setpoint to prevent giving the wrist a setpoint value that exceeds it's max or min rotation range to prevent it from breaking itself
@@ -211,23 +214,19 @@ public class WristSubsystemPID extends SubsystemBase {
     //clamp the final motor power to prevent it from going to fast. This is useful in real life to stop your subsystem from breaking. 
     MathUtil.clamp(m_motorPower, WristConstantsPID.kMinPower, WristConstantsPID.kMaxPower); 
 
-    /**
-     * Add a gravity compensation value to help the wrist fight back against gravity. The PID value gets so small near the actual setpoint 
-     * that the motor is unable to overcome gravity
-     */
     m_wristMotor.set(m_motorPower);
     
   }
 
 
   /**
-   * This function converts the armSim physics simulation radian measurement to ticks(in integer form) for the simulated falcon encoder
+   * This function converts the physics simulation radian measurement to ticks(in integer form) for the simulated falcon encoder
    * The falcon encoder accepts only integers. 
    * 
-   * @param rads the armSim's radian measurement
+   * @param rads the sim's radian measurement
    * @return raw encoder position in integer form 
    */
-  public int armSimRadsToTicks(double rads){
+  public int physicsSimRadsToTicks(double rads){
     int rawPos = (int)((rads/(2*Math.PI))*2048);
     return rawPos;  
   }

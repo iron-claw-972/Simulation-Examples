@@ -36,7 +36,7 @@ public class WristSubsystemMotorPower extends SubsystemBase {
   private MechanismRoot2d m_pivot; 
   private MechanismLigament2d m_stationary; 
   private MechanismLigament2d m_moving; 
-  private SingleJointedArmSim m_wristSim; 
+  private SingleJointedArmSim m_wristPhysicsSim; 
 
   private double m_motorPower; 
 
@@ -61,7 +61,7 @@ public class WristSubsystemMotorPower extends SubsystemBase {
 
       //create wrist physics simulation. This will simulate the physics of our wrist. 
       //we are calculating the physiscs of our wrist based on a single jointed arm. 
-      m_wristSim = new SingleJointedArmSim(
+      m_wristPhysicsSim = new SingleJointedArmSim(
         WristConstantsMotorPower.m_armGearbox, 
         WristConstantsMotorPower.kGearing, 
         WristConstantsMotorPower.kMomentOfInertia, 
@@ -90,7 +90,7 @@ public class WristSubsystemMotorPower extends SubsystemBase {
           new MechanismLigament2d(
               "Moving",
               30,
-              Units.radiansToDegrees(m_wristSim.getAngleRads()),
+              Units.radiansToDegrees(m_wristPhysicsSim.getAngleRads()),
               6,
               new Color8Bit(Color.kYellow)));
   
@@ -121,7 +121,7 @@ public class WristSubsystemMotorPower extends SubsystemBase {
      */
     moveMotor();
     /**
-     * First, we set our voltage to the physiscs sim. 
+     * First, we set our voltage to the physics sim. 
      *  
      * We do this by multipling the motor's power value(-1 to 1) by the calculated battery voltage
      * 
@@ -133,20 +133,20 @@ public class WristSubsystemMotorPower extends SubsystemBase {
      *
      * Initally, in the constructor we call setMotorPower(0). Then we call moveMotor(), setting our desired power of 0. So, m_wristMotor.get() returns 0. Thus, we multiply our battery voltage by 0. We set a voltage of 0 to the physics simulation.
      * 
-     * However the arm sim's angle still changes every loop iteration because it does calculations based on gravity. Thus doing m_armSim.getAngleRads() yields an angle.
+     * However the physics sim's angle still changes every loop iteration because it does calculations based on gravity. Thus doing m_armSim.getAngleRads() yields an angle.
      *
      * However when we call setMotorPower(0.5) in our controls.java file, which sets the speed to 50%, m_wristMotor.get() returns 0.5. Thus we set a different voltage to the physics sim, changing it's angle. 
      * 
      */    
-    m_wristSim.setInput(m_wristMotor.get() * BatterySim.calculateDefaultBatteryLoadedVoltage(m_wristSim.getCurrentDrawAmps()));
+    m_wristPhysicsSim.setInput(m_wristMotor.get() * BatterySim.calculateDefaultBatteryLoadedVoltage(m_wristPhysicsSim.getCurrentDrawAmps()));
     
   
     // Next, we update the armSim physics simulation. The standard loop time is 20ms.
-    m_wristSim.update(0.020);
+    m_wristPhysicsSim.update(0.020);
       
 
-    // Finally update the moving arm's angle based on the armSim angle. This updates the display. 
-    m_moving.setAngle(Units.radiansToDegrees(m_wristSim.getAngleRads()));
+    // Finally update the moving arm's angle based on the physics sims's angle. This updates the display. 
+    m_moving.setAngle(Units.radiansToDegrees(m_wristPhysicsSim.getAngleRads()));
      
 
     //finally, loop back to the top of the loop. 
