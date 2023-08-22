@@ -127,8 +127,7 @@ public class WristSubsystemPID extends SubsystemBase {
 
 
     //inititally have the PID setpoint be set to the wrist's resting position so that the wrist doesn't fly up when powered on on a real robot. 
-
-    setSetpoint(Units.radiansToDegrees(-12));
+    setSetpoint(Units.radiansToDegrees(WristConstantsPID.kMinAngleRadsSoftStop));
 
     
 
@@ -146,20 +145,24 @@ public class WristSubsystemPID extends SubsystemBase {
   //This is the simulationPeriodic() method. It constantly runs in simuation. 
   @Override
   public void simulationPeriodic() {    
+    moveMotorsWithPID(); 
+
     /**
-     * First, we set our voltage to the armSim
+     * First, we set our voltage to the physics sim
      *  
      * We do this by multipling the motor's power value(-1 to 1) by the calculated battery voltage
      * 
-     * The BatterySim estimates loaded battery voltages(voltage of battery under load due to motors and other stuff running) based on the armSim's calculation of it's current draw. 
+     * The BatterySim estimates loaded battery voltages(voltage of battery under load due to motors and other stuff running) based on the physics sim's calculation of it's current draw. 
      * 
      * Adding up all the currents of all of our subsystems would give us a more accurate loaded battery voltage number and a more accurate sim. But it's fine for this. It may or may not be neccesary to add based on the current draw of the other subsystems.  
      *    
-     * If we were to call m_armSim.getAngleRads() the armSim physiscs simulation would do some math using this voltage and gravity and other stuff(probably) and calculate its angle in radians. 
+     * If we were to call m_armSim.getAngleRads() the physiscs sim would do some math using this voltage and gravity and other stuff(probably) and calculate its angle in radians. 
      *
-     * Initally, before we even give the wrist a setpoint to go to, m_wristMotor.get() returns 0. Thus we set a voltage of 0 to the armSim.
+     * Initally, in the constructor we give the wrist a setpoint to go to by calling setSetpoint(). Then, by calling moveMotorsWithPID(), m_wristMotor.get() returns a number that isn't 0. Thus, if we multiply it by the calculated battery voltage, we set a voltage to the physics sim. This changes the angle of the physics simulation. 
+     *      
+     * This voltage changes depending on the setpoint that we set to the wrist(see controls.java where we set these setpoints using instant commands). Thus, the simulated angle changes.
      * 
-     * However the arm sim's angle changes because it does calculations based on gravity. Thus doing m_armSim.getAngleRads() yields an angle.
+     * Finally, by setting the angle of the sim to the moving part of the wrist, we see it changes angle in the display. 
      */    
     m_armSim.setInput(m_wristMotor.get() * BatterySim.calculateDefaultBatteryLoadedVoltage(m_armSim.getCurrentDrawAmps()));
     
@@ -177,7 +180,6 @@ public class WristSubsystemPID extends SubsystemBase {
     //Finally update the moving arm's angle based on the armSim angle. This updates the display. 
     m_moving.setAngle(Units.radiansToDegrees(m_armSim.getAngleRads()));
     
-    moveMotorsWithPID(); 
   }
 
   /**
